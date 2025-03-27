@@ -21,3 +21,10 @@ $ http://localhost:8000/swagger
 
 # swagger yaml
 $ http://localhost:8000/swagger/yaml
+```
+
+## Prisma
+```bash
+# prisma studio
+$ pnpm db:studio
+```
