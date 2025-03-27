@@ -6,6 +6,7 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { PrismaModule } from '@core/prisma/prisma.module';
 import { AccessJWTGuard } from '@shared/guards/access-jwt.guard';
 import { NotificationModule } from '@modules/notification/notification.module';
+import { CustomerModule } from '@modules/customer/customer.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationModule } from '@modules/notification/notification.module';
     }),
     AuthModule,
     PrismaModule,
+    CustomerModule,
     NotificationModule,
   ],
   providers: [AccessJWTGuard],

@@ -6,7 +6,7 @@ import { ValidationErrorDto } from '@shared/dto/validation-error.dto';
 
 export function CustomApiResponse<
   T extends Type<unknown> | Function | [Function] | string,
->(SuccessResponseDto: T) {
+>(SuccessResponseDto: T, successStatus: number = 200) {
   return applyDecorators(
     ApiResponse({
       description: 'Validation error',
@@ -19,9 +19,8 @@ export function CustomApiResponse<
       type: CustomErrorDto,
     }),
     ApiResponse({
-      status: 200,
+      status: successStatus,
       type: SuccessResponseDto,
     }),
-    HttpCode(200),
   );
 }
