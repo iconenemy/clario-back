@@ -5,6 +5,7 @@ import { CoreController } from '@core/core.controller';
 import { AuthModule } from '@modules/auth/auth.module';
 import { PrismaModule } from '@core/prisma/prisma.module';
 import { AccessJWTGuard } from '@shared/guards/access-jwt.guard';
+import { NotificationModule } from '@modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AccessJWTGuard } from '@shared/guards/access-jwt.guard';
     }),
     AuthModule,
     PrismaModule,
+    NotificationModule,
   ],
   providers: [AccessJWTGuard],
   controllers: [CoreController],
