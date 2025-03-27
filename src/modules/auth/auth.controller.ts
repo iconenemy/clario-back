@@ -1,4 +1,4 @@
-import { Post, Body, Controller, Get } from '@nestjs/common';
+import { Post, Body, Controller, Get, HttpCode } from '@nestjs/common';
 
 import { Public } from '@shared/decorators/public.decorator';
 import { CustomApiResponse } from '@shared/decorators/success-response.decorator';
@@ -11,8 +11,9 @@ import { LoginReqDto, LoginResDto } from './dto/login.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
+  @HttpCode(200)
   @CustomApiResponse(LoginResDto)
+  @Post('login')
   public login(@Body() dto: LoginReqDto) {
     return this.authService.login(dto);
   }
