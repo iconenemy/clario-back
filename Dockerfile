@@ -12,7 +12,7 @@ RUN pnpm fetch
 
 COPY . .
 
-RUN pnpm install --offline
+RUN pnpm install
 RUN npx prisma generate
 
 # BUILD STAGE
