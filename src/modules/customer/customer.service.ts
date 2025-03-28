@@ -5,6 +5,7 @@ import { PrismaService } from '@core/prisma/prisma.service';
 
 import { UpdateCustomerReqDto } from './dto/update-customer.dto';
 import { CreateCustomerReqDto } from './dto/create-customer.dto';
+import { FindCustomersReqDto } from './dto/find-customers.dto';
 
 @Injectable()
 export class CustomerService {
@@ -34,11 +35,45 @@ export class CustomerService {
     return { message: 'The customer created successfully' };
   }
 
-  public async findAll(): Promise<Array<Customer>> {
-    return this.prismaService.customer.findMany().catch((error: Error) => {
-      this.logger.error(`FindAll - ${error.message}`);
-      return [];
-    });
+  public async findAll(
+    query: FindCustomersReqDto,
+  ): Promise<{ customers: Array<Customer>; total: number }> {
+    const { page = 1, search = '', order = 'asc', sort_by = 'id' } = query;
+
+    const take = 10;
+    const skip = (page - 1) * take;
+
+    const orderBy = {
+      [sort_by]: order === 'asc' ? 'asc' : 'desc',
+    };
+
+    const [customers, total] = await Promise.all([
+      this.prismaService.customer
+        .findMany({
+          where: {
+            email: {
+              startsWith: search,
+              mode: 'insensitive',
+            },
+          },
+          take,
+          skip,
+          orderBy,
+        })
+        .catch((error: Error) => {
+          this.logger.error(`FindAll - ${error.message}`);
+          return [];
+        }),
+      this.prismaService.customer.count({
+        where: {
+          email: {
+            startsWith: search,
+          },
+        },
+      }),
+    ]);
+
+    return { customers, total };
   }
 
   public async findOne(id: string): Promise<Customer | null> {
@@ -51,10 +86,18 @@ export class CustomerService {
   }
 
   public async update(id: string, dto: UpdateCustomerReqDto) {
-    const customerOrder = await this.findOne(id);
+    const { email } = dto;
 
-    if (!customerOrder)
+    const [customerCandidate, customerOrder] = await Promise.all([
+      this.findOne(id),
+      this.prismaService.customer.findUnique({ where: { email } }),
+    ]);
+
+    if (!customerCandidate)
       throw new ConflictException("Such customer doesn't exist.");
+
+    if (customerOrder && customerOrder.email !== customerCandidate.email)
+      throw new ConflictException('A customer with such email already exists.');
 
     await this.prismaService.customer.update({
       where: { id },
@@ -65,6 +108,8 @@ export class CustomerService {
   }
 
   public async remove(id: string) {
+    this.logger.log('Remove customer');
+
     const customerOrder = await this.findOne(id);
 
     if (!customerOrder)

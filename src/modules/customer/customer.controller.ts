@@ -4,9 +4,9 @@ import {
   Body,
   Patch,
   Param,
+  Query,
   Delete,
   Controller,
-  HttpCode,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse } from '@nestjs/swagger';
 
@@ -17,6 +17,10 @@ import { CustomerService } from './customer.service';
 import { FindCustomerResDto } from './dto/find-customer.dto';
 import { UpdateCustomerReqDto } from './dto/update-customer.dto';
 import { CreateCustomerReqDto } from './dto/create-customer.dto';
+import {
+  FindCustomersReqDto,
+  FindCustomersResDto,
+} from './dto/find-customers.dto';
 
 @Controller('customer')
 export class CustomerController {
@@ -30,10 +34,10 @@ export class CustomerController {
   }
 
   @ApiBearerAuth('access_token')
-  @CustomApiResponse([FindCustomerResDto])
+  @CustomApiResponse(FindCustomersResDto)
   @Get()
-  public findAll() {
-    return this.customerService.findAll();
+  public findAll(@Query() query: FindCustomersReqDto) {
+    return this.customerService.findAll(query);
   }
 
   @ApiBearerAuth('access_token')
