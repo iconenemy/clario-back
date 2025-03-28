@@ -1,9 +1,10 @@
-import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common';
 
 import { CoreModule } from '@core/core.module';
+import { AccessJWTGuard } from '@shared/guards/access-jwt.guard';
 
 const logger = new Logger('CoreModule');
 
@@ -18,9 +19,38 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  /* DTO Validator */
+  app.useGlobalPipes(
+    new ValidationPipe({
+      exceptionFactory: (errors) => {
+        const result = errors.map((error) => ({
+          property: error.property,
+          message: error.constraints[Object.keys(error.constraints)[0]],
+        }));
+        return new BadRequestException(result);
+      },
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  );
+
+  /* Protect All Endpoints */
+  app.useGlobalGuards(app.get(AccessJWTGuard));
+
   /* Swagger */
   const config = new DocumentBuilder()
     .setTitle('API docs')
+    .addBearerAuth(
+      {
+        description: `Please enter token in following format: JWT`,
+        name: 'Authorization',
+        bearerFormat: 'Bearer',
+        scheme: 'Bearer',
+        type: 'http',
+        in: 'Header',
+      },
+      'access_token',
+    )
     .setVersion('0.0.1')
     .build();
   const document = SwaggerModule.createDocument(app, config, {

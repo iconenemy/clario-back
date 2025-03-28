@@ -1,9 +1,13 @@
-import { ApiResponse } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
 
+import { Public } from '@shared/decorators/public.decorator';
+import { SuccessResDto } from '@shared/dto/success-response.dto';
+import { CustomApiResponse } from '@shared/decorators/success-response.decorator';
+
+@Public()
 @Controller()
 export class CoreController {
-  @ApiResponse({ status: 200, description: 'Health check' })
+  @CustomApiResponse(SuccessResDto)
   @Get('health')
   healthCheck() {
     return { message: 'Okey' };
